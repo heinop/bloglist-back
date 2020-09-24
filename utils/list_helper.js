@@ -38,13 +38,28 @@ const mostBlogs = (blogs) => {
   }, null);
 };
 
-// _.reduce (arraysta olioksi, jossa blogaajakohtainen blogien määrä)
-// _.map (oliosta olio-arrayksi)
-// _.maxBy (arraysta suurin olio propertyn preusteella)
+const mostLikes = (blogs) => {
+  const likeCounts = _.reduce(blogs, (result, current) => {
+    result[current.author] = result[current.author]
+      ? result[current.author] + current.likes
+      : current.likes;
+    return result;
+  }, {});
+
+  const likesArr = Object.keys(likeCounts).map(key => {
+    return {
+      author: key,
+      likes: likeCounts[key]
+    };
+  });
+
+  return _.maxBy(likesArr, 'likes');
+};
 
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 };

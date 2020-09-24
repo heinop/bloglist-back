@@ -143,3 +143,33 @@ describe('mostBlogs', () => {
     });
   });
 });
+
+describe('mostLikes', () => {
+  test('of empty array is null', () => {
+    expect(listHelper.mostBlogs([])).toBe(null);
+  });
+
+  test('of an array of one blog return the author and likes of the blog', () => {
+    const blogs = [
+      {
+        _id: '5a422a851b54a676234d17f7',
+        title: 'React patterns',
+        author: 'Michael Chan',
+        url: 'https://reactpatterns.com/',
+        likes: 7,
+        __v: 0
+      }
+    ];
+    expect(listHelper.mostLikes(blogs)).toEqual({
+      author: 'Michael Chan',
+      likes: 7
+    });
+  });
+
+  test('will return the author with most likes and his/her like count', () => {
+    expect(listHelper.mostLikes(BLOGS)).toEqual({
+      author: 'Edsger W. Dijkstra',
+      likes: 17
+    });
+  });
+});
