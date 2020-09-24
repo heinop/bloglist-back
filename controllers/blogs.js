@@ -3,11 +3,9 @@ const blog = require('../models/blog');
 const Blog = require('../models/blog');
 
 // Get all blogs
-blogsRouter.get('/', (request, response) => {
-  Blog.find({})
-    .then(blogs => {
-      response.json(blogs);
-    });
+blogsRouter.get('/', async (request, response) => {
+  const blogs = await Blog.find({});
+  response.json(blogs);
 });
 
 // Add new blog
