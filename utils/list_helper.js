@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const dummy = (blogs) => {
   return 1;
 };
@@ -23,8 +25,26 @@ const favoriteBlog = (blogs) => {
     : null;
 };
 
+const mostBlogs = (blogs) => {
+  return _.reduce(_.countBy(blogs, 'author'), (leader, value, key) => {
+    if (!leader || value > leader.blogs) {
+      return {
+        author: key,
+        blogs: value
+      };
+    } else {
+      return leader;
+    }
+  }, null);
+};
+
+// _.reduce (arraysta olioksi, jossa blogaajakohtainen blogien määrä)
+// _.map (oliosta olio-arrayksi)
+// _.maxBy (arraysta suurin olio propertyn preusteella)
+
 module.exports = {
   dummy,
   totalLikes,
-  favoriteBlog
+  favoriteBlog,
+  mostBlogs
 };
