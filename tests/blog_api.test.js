@@ -33,6 +33,13 @@ test('a specific blog is within returned blogs', async () => {
   expect(titles).toContain('Canonical string reduction');
 });
 
+test('returned blogs are identified by id field', async () => {
+  const response = await api.get('/api/blogs');
+  for (let blog of response.body) {
+    expect(blog.id).toBeDefined();
+  }
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
