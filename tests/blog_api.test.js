@@ -4,6 +4,7 @@ const helper = require('./test_helper');
 const app = require('../app');
 const Blog = require('../models/blog');
 const test_helper = require('./test_helper');
+const blogsRouter = require('../controllers/blogs');
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -106,6 +107,18 @@ test('adding a new blog that is missing url results in http 400', async () => {
 
   const blogsInEnd = await helper.blogsInDb();
   expect(blogsInEnd.length).toBe(helper.initialBlogs.length);
+});
+
+test('deleting a blog is possible using a valid id', async () => {
+  const blogsAtStart = await helper.blogsInDb();
+  const id = blogsAtStart[0].id;
+
+  await api
+    .delete(`/api/blogs/${id}`)
+    .expect(204);
+
+  const blogsInEnd = await helper.blogsInDb();
+  expect(blogsInEnd.length).toBe(helper.initialBlogs.length - 1);
 });
 
 afterAll(() => {
