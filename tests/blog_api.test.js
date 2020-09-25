@@ -78,6 +78,36 @@ test('if a new blog has no likes a default value of 0 is set', async () => {
   expect(addedBlog.likes).toBe(0);
 });
 
+test('adding a new blog that is missing title results in http 400', async () => {
+  const newBlog = {
+    author: 'Unit Tester',
+    url: 'unit.test.url',
+    likes: 3
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400);
+
+  const blogsInEnd = await helper.blogsInDb();
+  expect(blogsInEnd.length).toBe(helper.initialBlogs.length);
+});
+
+test('adding a new blog that is missing url results in http 400', async () => {
+  const newBlog = {
+    title: 'My first test blog',
+    author: 'Unit Tester',
+    likes: 3
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400);
+
+  const blogsInEnd = await helper.blogsInDb();
+  expect(blogsInEnd.length).toBe(helper.initialBlogs.length);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
