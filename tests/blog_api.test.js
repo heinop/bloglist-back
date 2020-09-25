@@ -59,6 +59,25 @@ test('a new blog can be added to database', async () => {
   expect(blogsInEnd.map(blog => blog.title)).toContain('My first test blog');
 });
 
+test('if a new blog has no likes a default value of 0 is set', async () => {
+  const newBlog = {
+    title: 'My first test blog',
+    author: 'Unit Tester',
+    url: 'unit.test.url'
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
+  const blogsInEnd = await helper.blogsInDb();
+
+  expect(blogsInEnd.length).toBe(helper.initialBlogs.length + 1);
+  const addedBlog = blogsInEnd.find(b => b.title === 'My first test blog');
+  expect(addedBlog.likes).toBe(0);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
