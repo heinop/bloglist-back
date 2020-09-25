@@ -40,6 +40,25 @@ test('returned blogs are identified by id field', async () => {
   }
 });
 
+test('a new blog can be added to database', async () => {
+  const newBlog = {
+    title: 'My first test blog',
+    author: 'Unit Tester',
+    url: 'unit.test.url',
+    likes: 1
+  };
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
+  const blogsInEnd = await helper.blogsInDb();
+
+  expect(blogsInEnd.length).toBe(helper.initialBlogs.length + 1);
+  expect(blogsInEnd.map(blog => blog.title)).toContain('My first test blog');
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
