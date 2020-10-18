@@ -3,14 +3,6 @@ const blogsRouter = require('express').Router();
 const Blog = require('../models/blog');
 const User = require('../models/user');
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7);
-  }
-  return null;
-};
-
 // Get all blogs
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
@@ -23,7 +15,7 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body;
 
-  const token = getTokenFrom(request);
+  const token = request.token;
   const decodedToken = jwt.verify(token, process.env.SECRET);
   if (!token || !decodedToken.id) {
     return response.status(401).json({ error: 'invalid or missing token' });
@@ -41,8 +33,22 @@ blogsRouter.post('/', async (request, response, next) => {
 
 // Delete an existing blog
 blogsRouter.delete('/:id', async (request, response, next) => {
-  await Blog.findByIdAndRemove(request.params.id);
-  response.status(204).end();
+  const token = request.token;
+  const decodedToken = jwt.verify(token, process.env.SECRET);
+  if (!token || !decodedToken.id) {
+    return response.status(401).json({ error: 'invalid or missing token' });
+  }
+  const userId = decodedToken.id;
+  console.log('UserId', userId);
+  const blog = await Blog.findById(request.params.id);
+  console.log('Blog', blog);
+
+  if (blog.user.toString() === userId.toString()) {
+    await Blog.findByIdAndRemove(request.params.id);
+    response.status(204).end();
+  } else {
+    return response.status(401).json({ error: 'user can only delete their own blogs' });
+  }
 });
 
 // Update an existing blog
