@@ -40,6 +40,19 @@ const initialBlogs = [
   }
 ];
 
+const initialUsers = [
+  {
+    username: 'test1',
+    name: 'TestUser1',
+    passwordHash: '123123986'
+  },
+  {
+    username: 'test2',
+    name: 'TestUser2',
+    passwordHash: '049875203894657'
+  }
+];
+
 const nonExistingId = async () => {
   const blog = new Blog({
     title: 'willremovethissoon',
@@ -63,6 +76,21 @@ const usersInDb = async () => {
   return users.map(u => u.toJSON());
 };
 
+const test1UserId = async () => {
+  const searchResult = await User.find({ username: 'test1' });
+  return searchResult[0]._id.toString();
+};
+
+const test2UserId = async () => {
+  const searchResult = await User.find({ username: 'test2' });
+  return searchResult[0]._id.toString();
+};
+
+const getOneBlog = async () => {
+  return (await Blog.findOne()).toJSON();
+};
+
 module.exports = {
-  initialBlogs, nonExistingId, blogsInDb, usersInDb
+  initialBlogs, initialUsers, nonExistingId,
+  blogsInDb, usersInDb, test1UserId, test2UserId, getOneBlog
 };
