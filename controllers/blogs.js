@@ -14,13 +14,16 @@ blogsRouter.get('/', async (request, response) => {
 // Add new blog
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body;
+  console.log('Adding new blog:', body);
 
   const token = request.token;
   if (!token) {
+    console.log('token missing');
     return response.status(401).json({ error: 'missing token' });
   }
   console.log('Token', token);
   const decodedToken = jwt.verify(token, process.env.SECRET);
+  console.log('Decoded token:', decodedToken);
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'invalid token' });
   }
