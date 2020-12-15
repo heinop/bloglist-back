@@ -28,10 +28,12 @@ blogsRouter.post('/', async (request, response, next) => {
   const user = await User.findById(decodedToken.id);
 
   const blog = new Blog({ user: user._id, ...request.body });
-  const savedBlog = await blog.save();
+  let savedBlog = await blog.save();
 
   user.blogs = user.blogs.concat(savedBlog._id);
   await user.save();
+
+  await savedBlog.populate('user', { username: 1, name: 1 }).execPopulate();
 
   response.status(201).json(savedBlog.toJSON());
 });
