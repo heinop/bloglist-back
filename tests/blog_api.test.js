@@ -239,25 +239,40 @@ describe('when there are already some blogs in db', () => {
 
   describe('updating an existing blog', () => {
 
+    beforeEach(async () => {
+      const testUserId = await helper.test1UserId();
+      jwt.verify = jest.fn().mockReturnValue({ id: testUserId });
+    });
+
     test('is possible with valid blog object', async () => {
-      const blogsAtStart = await helper.blogsInDb();
-      const blogToUpdate = { ...blogsAtStart[0] };
-      blogToUpdate.likes = blogToUpdate.likes + 10;
+      // Get random blog from db and make test1 user the owner
+      let blog = await helper.getOneBlog();
+      const blogId = blog.id;
+      delete blog.id;
+      const userId = await helper.test1UserId();
+      blog.user = userId;
+      blog = await Blog.findByIdAndUpdate(blogId, blog, { new: true });
+
+      const originalBlog = blog.toJSON();
+      console.log('OriginalBlog:', originalBlog);
+      blog.likes = blog.likes + 10;
 
       const response = await api
-        .put(`/api/blogs/${blogToUpdate.id}`)
-        .send(blogToUpdate)
+        .put(`/api/blogs/${blog.id}`)
+        .set({ Authorization: `Bearer ${encodedToken}` })
+        .send(blog)
         .expect(200);
 
       const updatedBlog = response.body;
 
-      expect(updatedBlog.likes).toBe(blogsAtStart[0].likes + 10);
-      expect(updatedBlog.title).toBe(blogsAtStart[0].title);
+      expect(updatedBlog.likes).toBe(originalBlog.likes + 10);
+      expect(updatedBlog.title).toBe(originalBlog.title);
     });
 
     test('fails with http 404 when id is valid but not found in database', async () => {
       await api
         .put(`/api/blogs/${helper.nonExistingId}`)
+        .set({ Authorization: `Bearer ${encodedToken}` })
         .expect(400);
     });
 
@@ -265,6 +280,7 @@ describe('when there are already some blogs in db', () => {
       const invalidId = 12345;
       await api
         .put(`/api/blogs/${invalidId}`)
+        .set({ Authorization: `Bearer ${encodedToken}` })
         .expect(400);
     });
 
