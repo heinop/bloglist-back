@@ -1,8 +1,10 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const usersRouter = require('express').Router();
 const User = require('../models/user');
 
 usersRouter.get('/', async (request, response) => {
+
   const users = await User
     .find({})
     .populate('blogs', { url: 1, title: 1, author: 1 });
@@ -11,7 +13,6 @@ usersRouter.get('/', async (request, response) => {
 
 usersRouter.post('/', async (request, response) => {
   const body = request.body;
-
   if (!body.password) {
     return response.status(400).json({ error: 'password required' });
   } else if (body.password.length < 3) {
@@ -30,5 +31,18 @@ usersRouter.post('/', async (request, response) => {
   const savedUser = await user.save();
   response.json(savedUser);
 });
+
+const authenticate = (request, response) => {
+  const token = request.token;
+  if (!token) {
+    console.log('token missing');
+    return response.status(401).json({ error: 'missing token' });
+  }
+  const decodedToken = jwt.verify(token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'invalid token' });
+  }
+  return decodedToken;
+};
 
 module.exports = usersRouter;
