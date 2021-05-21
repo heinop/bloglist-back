@@ -69,6 +69,26 @@ blogsRouter.put('/:id', async (request, response, next) => {
   response.json(updatedBlog.toJSON());
 });
 
+// Add comment to a blog
+blogsRouter.post('/:id/comments', async (request, response, next) => {
+  authenticate(request, response);
+
+  const comment = request.body;
+  const blog = await Blog.findById(request.params.id);
+
+  if (blog) {
+    console.log(`Adding comment "${comment}" to blog ${blog.title}`);
+    const newBlog = { ...blog, comments: blog.comments.concat(comment) };
+    const updatedBlog = await Blog
+      .findByIdAndUpdate(request.params.id, newBlog, { new: true })
+      .populate('user', { username: 1, name: 1 });
+    response.json(updatedBlog.toJSON());
+  } else {
+    console.log('Blog not found by id:', request.params.id);
+    response.status(404).json({ error: 'invalid blog id' });
+  }
+});
+
 const authenticate = (request, response) => {
   const token = request.token;
   if (!token) {

@@ -289,6 +289,56 @@ describe('when there are already some blogs in db', () => {
   });
 });
 
+describe('adding a comment to an existing blog', () => {
+
+  beforeEach(async () => {
+    const testUserId = await helper.test1UserId();
+    jwt.verify = jest.fn().mockReturnValue({ id: testUserId });
+  });
+
+  test('is possible with valid blog id', async () => {
+    // Get random blog from db and make test1 user the owner
+    let blog = await helper.getOneBlog();
+    const blogId = blog.id;
+    delete blog.id;
+    const userId = await helper.test1UserId();
+    blog.user = userId;
+    blog = await Blog.findByIdAndUpdate(blogId, blog, { new: true });
+
+    const originalBlog = blog.toJSON();
+    blog.likes = blog.likes + 10;
+    blog.comments = blog.comments.concat('another comment');
+
+    const response = await api
+      .put(`/api/blogs/${blog.id}`)
+      .set({ Authorization: `Bearer ${encodedToken}` })
+      .send(blog)
+      .expect(200);
+
+    const updatedBlog = response.body;
+
+    expect(updatedBlog.likes).toBe(originalBlog.likes + 10);
+    expect(updatedBlog.title).toBe(originalBlog.title);
+    expect(updatedBlog.comments).toContain('another comment');
+  });
+
+  test('fails with http 404 when id is valid but not found in database', async () => {
+    await api
+      .put(`/api/blogs/${helper.nonExistingId}`)
+      .set({ Authorization: `Bearer ${encodedToken}` })
+      .expect(400);
+  });
+
+  test('fails with http 400 when id is invalid', async () => {
+    const invalidId = 12345;
+    await api
+      .put(`/api/blogs/${invalidId}`)
+      .set({ Authorization: `Bearer ${encodedToken}` })
+      .expect(400);
+  });
+
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
