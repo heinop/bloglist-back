@@ -23,6 +23,7 @@ blogsRouter.post('/', async (request, response, next) => {
   const user = await User.findById(userToken.id);
 
   const blog = new Blog({ user: user._id, ...request.body });
+  console.log('Saving blog %j', blog);
   let savedBlog = await blog.save();
 
   user.blogs = user.blogs.concat(savedBlog._id);
@@ -60,7 +61,6 @@ blogsRouter.put('/:id', async (request, response, next) => {
     author: body.author,
     url: body.url,
     likes: body.likes,
-    comments: body.comments,
     user: body.user
   };
   const updatedBlog = await Blog
