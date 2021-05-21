@@ -86,6 +86,7 @@ describe('when there are already some blogs in db', () => {
       const addedBlog = blogsInEnd.find(blog => blog.title === 'My first test blog');
       const testUserId = await helper.test1UserId();
       expect(addedBlog.user.toString()).toBe(testUserId);
+      expect(addedBlog.comments.length).toBe(0);
     });
 
     test('adds a default value of 0 to likes if no value is provided', async () => {
@@ -254,8 +255,8 @@ describe('when there are already some blogs in db', () => {
       blog = await Blog.findByIdAndUpdate(blogId, blog, { new: true });
 
       const originalBlog = blog.toJSON();
-      console.log('OriginalBlog:', originalBlog);
       blog.likes = blog.likes + 10;
+      blog.comments = blog.comments.concat('another comment');
 
       const response = await api
         .put(`/api/blogs/${blog.id}`)
@@ -267,6 +268,7 @@ describe('when there are already some blogs in db', () => {
 
       expect(updatedBlog.likes).toBe(originalBlog.likes + 10);
       expect(updatedBlog.title).toBe(originalBlog.title);
+      expect(updatedBlog.comments).toContain('another comment');
     });
 
     test('fails with http 404 when id is valid but not found in database', async () => {
